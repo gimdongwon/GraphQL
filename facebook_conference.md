@@ -65,7 +65,7 @@ Vaildate 확인을 한번해준다.
 NO built-in caching =>
 Overmatching
 ￼
-![facebookConf](./facebookConf.jpeg)
+![facebookConf](./images/facebookConf.jpeg)
 
 Client-side GraphQl introspection
 
