@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import { Query, Mutation } from "react-apollo";
 import { USERS } from "./API/graphQL/query/USERS";
+import { SELETEUSER } from "./API/graphQL/query/SELETEUSERS";
 import { ADD_USER } from "./API/graphQL/mutation/ADDUSER";
 import Loading from "./assets/Loading";
 import { REMOVE_USER } from "./API/graphQL/mutation/REMOVEUSER";
 import { UPDATE_USER } from "./API/graphQL/mutation/UPDATEUSER";
 class App extends Component {
   state = {
-    text: ""
+    text: "",
+    changeMode: false
   };
 
   handleTextEdit = e => {
@@ -15,22 +17,56 @@ class App extends Component {
       text: e.target.value
     });
   };
-
+  changeMode = e => {
+    this.setState({
+      changeMode: !this.state.changeMode,
+      text: e.target.textContent
+    });
+    console.log(e.target.parent);
+  };
   render() {
     return (
       <div className="App" style={{ margin: "20px" }}>
         <h1>스터디용 투두 리스트</h1>
         <div style={{ display: "flex" }}>
-          <input type="text" onChange={e => this.handleTextEdit(e)} />
-          <Mutation
-            mutation={ADD_USER}
-            variables={{ name: this.state.text }}
-            refetchQueries={[{ query: USERS }]}
-          >
-            {(addUser, { data }) => {
-              return <button onClick={addUser}>등록</button>;
-            }}
-          </Mutation>
+          <input
+            type="text"
+            onChange={e => this.handleTextEdit(e)}
+            value={this.state.text}
+          />
+
+          {this.state.changeMode === false ? (
+            <Mutation
+              mutation={ADD_USER}
+              variables={{ name: this.state.text }}
+              refetchQueries={[{ query: USERS }]}
+            >
+              {(addUser, { data }) => {
+                return <button onClick={addUser}>등록</button>;
+              }}
+            </Mutation>
+          ) : (
+            <Query query={SELETEUSER} variables={{ name: this.state.name }}>
+              {data => {
+                return (
+                  <Mutation
+                    mutation={UPDATE_USER}
+                    variables={{ id: data.id, name: this.state.text }}
+                    refetchQueries={[{ query: USERS }]}
+                  >
+                    {updateUser => {
+                      return (
+                        <button type="submit" onClick={updateUser}>
+                          변경
+                        </button>
+                      );
+                    }}
+                  </Mutation>
+                );
+              }}
+            </Query>
+          )}
+          <div>변경하려면 해당 글을 선택하세요</div>
         </div>
         <Query query={USERS}>
           {({ loading, error, data }) => {
@@ -40,7 +76,7 @@ class App extends Component {
             return data.users.map(item => (
               <React.Fragment key={item.id}>
                 <div style={{ marginTop: "5px", display: "flex" }}>
-                  <li>{item.name}</li>
+                  <li onClick={e => this.changeMode(e)}>{item.name}</li>
                   <Mutation
                     mutation={REMOVE_USER}
                     variables={{ id: item.id }}
@@ -50,21 +86,6 @@ class App extends Component {
                       return (
                         <button type="submit" onClick={removeUser}>
                           삭제
-                        </button>
-                      );
-                    }}
-                  </Mutation>
-
-                  {/* 변경을 새로운 페이지에다 input을 만들어서 할지 아니면 이벤트 두개를 줄지 모르겟다.. */}
-                  <Mutation
-                    mutation={UPDATE_USER}
-                    variables={{ id: item.id, name: this.state.text }}
-                    refetchQueries={[{ query: USERS }]}
-                  >
-                    {updateUser => {
-                      return (
-                        <button type="submit" onClick={updateUser}>
-                          변경
                         </button>
                       );
                     }}
