@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Query, Mutation } from "react-apollo";
 import { USERS } from "./API/graphQL/query/USERS";
-import { SELETEUSER } from "./API/graphQL/query/SELETEUSERS";
 import { ADD_USER } from "./API/graphQL/mutation/ADDUSER";
 import Loading from "./assets/Loading";
 import { REMOVE_USER } from "./API/graphQL/mutation/REMOVEUSER";
@@ -9,7 +8,8 @@ import { UPDATE_USER } from "./API/graphQL/mutation/UPDATEUSER";
 class App extends Component {
   state = {
     text: "",
-    changeMode: false
+    changeMode: false,
+    changeText: ""
   };
 
   handleTextEdit = e => {
@@ -20,10 +20,16 @@ class App extends Component {
   changeMode = e => {
     this.setState({
       changeMode: !this.state.changeMode,
-      text: e.target.textContent
+      text: e.target.textContent,
+      changeText: e.target.textContent
     });
-    console.log(e.target.parent);
   };
+  afterUpdate = e => {
+    this.setState({
+      changeMode: !this.state.changeMode
+    });
+  };
+
   render() {
     return (
       <div className="App" style={{ margin: "20px" }}>
@@ -46,22 +52,27 @@ class App extends Component {
               }}
             </Mutation>
           ) : (
-            <Query query={SELETEUSER} variables={{ name: this.state.name }}>
-              {data => {
-                return (
-                  <Mutation
-                    mutation={UPDATE_USER}
-                    variables={{ id: data.id, name: this.state.text }}
-                    refetchQueries={[{ query: USERS }]}
-                  >
-                    {updateUser => {
-                      return (
-                        <button type="submit" onClick={updateUser}>
-                          변경
-                        </button>
-                      );
-                    }}
-                  </Mutation>
+            <Query query={USERS}>
+              {({ data }) => {
+                return data.users.map(item =>
+                  item.name == this.state.changeText ? (
+                    <React.Fragment key={item.id}>
+                      <Mutation
+                        mutation={UPDATE_USER}
+                        variables={{
+                          id: item.id,
+                          name: this.state.text
+                        }}
+                        refetchQueries={[{ query: USERS }]}
+                      >
+                        {updateUser => {
+                          return <button onClick={updateUser}>수정</button>;
+                        }}
+                      </Mutation>
+                    </React.Fragment>
+                  ) : (
+                    ""
+                  )
                 );
               }}
             </Query>
@@ -72,7 +83,7 @@ class App extends Component {
           {({ loading, error, data }) => {
             if (loading) return <Loading />;
             if (error) console.error(error);
-            if (data) console.log(data);
+            if (data) console.log(data.users);
             return data.users.map(item => (
               <React.Fragment key={item.id}>
                 <div style={{ marginTop: "5px", display: "flex" }}>
