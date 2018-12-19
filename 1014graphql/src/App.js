@@ -48,7 +48,7 @@ class App extends Component {
               variables={{ name: this.state.text }}
               refetchQueries={[{ query: USERS }]}
             >
-              {(addUser, { data }) => {
+              {addUser => {
                 return <button onClick={addUser}>등록</button>;
               }}
             </Mutation>
