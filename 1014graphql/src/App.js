@@ -55,7 +55,7 @@ class App extends Component {
             <Query query={USERS}>
               {({ data }) => {
                 return data.users.map(item =>
-                  item.name == this.state.changeText ? (
+                  item.name === this.state.changeText ? (
                     <React.Fragment key={item.id}>
                       <Mutation
                         mutation={UPDATE_USER}
@@ -66,7 +66,14 @@ class App extends Component {
                         refetchQueries={[{ query: USERS }]}
                       >
                         {updateUser => {
-                          return <button onClick={updateUser}>수정</button>;
+                          return (
+                            <button
+                              onClick={updateUser}
+                              onClickCapture={this.afterUpdate}
+                            >
+                              수정
+                            </button>
+                          );
                         }}
                       </Mutation>
                     </React.Fragment>
