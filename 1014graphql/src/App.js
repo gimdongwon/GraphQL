@@ -26,7 +26,8 @@ class App extends Component {
   };
   afterUpdate = e => {
     this.setState({
-      changeMode: !this.state.changeMode
+      changeMode: !this.state.changeMode,
+      text: ""
     });
   };
 
@@ -54,8 +55,9 @@ class App extends Component {
           ) : (
             <Query query={USERS}>
               {({ data }) => {
-                return data.users.map(item =>
-                  item.name === this.state.changeText ? (
+                return data.users
+                  .filter(item => item.name === this.state.changeText)
+                  .map(item => (
                     <React.Fragment key={item.id}>
                       <Mutation
                         mutation={UPDATE_USER}
@@ -77,10 +79,7 @@ class App extends Component {
                         }}
                       </Mutation>
                     </React.Fragment>
-                  ) : (
-                    ""
-                  )
-                );
+                  ));
               }}
             </Query>
           )}
